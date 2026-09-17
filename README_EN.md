@@ -10,8 +10,6 @@ Make Minecraft Client Great Again!
 
 The default hotkey to open the in-game config GUI is **O + C**.
 
-![icon](./icon.png)
-
 # Dependencies
 
 | Dependency | Download |
