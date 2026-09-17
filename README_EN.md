@@ -114,3 +114,5 @@ The output is placed under `build/libs/`.
 
 This project is available under the LGPL-3.0 license. The original
 [Oh My Minecraft Client](https://github.com/plusls/oh-my-minecraft-client) is also licensed under LGPL-3.0.
+
+Powered by [Deepseek](https://chat.deepseek.com/)
