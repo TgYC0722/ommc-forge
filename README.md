@@ -95,17 +95,6 @@ MaFgLib 是 malilib 的 Forge 移植版，本模组的配置系统、配置界�
 - `blockModelNoOffsetWhiteList` 方块模型没有偏移列表白名单
 - `worldEaterMineHelperWhitelist` 世吞挖矿助手白名单
 
-# 构建
-
-需要 JDK 17。把 MaFgLib 的 jar 放到 `libs/repo` 下的 Maven 布局目录中，
-然后用 Gradle 构建：
-
-```bash
-./gradlew clean build
-```
-
-产物在 `build/libs/` 下。
-
 # 许可
 
 本项目在 LGPL-3.0 许可证下可用。原版 [Oh My Minecraft Client](https://github.com/plusls/oh-my-minecraft-client) 同样使用 LGPL-3.0。
