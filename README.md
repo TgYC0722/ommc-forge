@@ -1,6 +1,6 @@
 # Oh My Minecraft Client Forge 1.20.1
 
-本 mod 迁移至 [ommc](https://github.com/plusls/oh-my-minecraft-client)
+本 mod 由 Deepseek V4.1-flash 迁移自 [ommc](https://github.com/plusls/oh-my-minecraft-client)
 
 > 这是 [Oh My Minecraft Client](https://github.com/plusls/oh-my-minecraft-client) 的 **Forge 1.20.1 移植版**。
 > 原版是 Fabric 模组，作者为 plusls。本移植版与原版各自独立维护，功能范围也不完全一致
@@ -98,3 +98,5 @@ MaFgLib 是 malilib 的 Forge 移植版，本模组的配置系统、配置界�
 # 许可
 
 本项目在 LGPL-3.0 许可证下可用。原版 [Oh My Minecraft Client](https://github.com/plusls/oh-my-minecraft-client) 同样使用 LGPL-3.0。
+
+Powered by [Deepseek](https://chat.deepseek.com/)
