@@ -12,7 +12,7 @@
 
 默认使用 **O + C** 打开设置界面
 
-![icon](./icon.png)
+![icon](./icon.jpg)
 
 # 依赖
 
