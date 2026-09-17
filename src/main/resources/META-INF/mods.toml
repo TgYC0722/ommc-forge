@@ -1,0 +1,46 @@
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
+license="${mod_license}"
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+authors="${mod_authors}"
+description='''${mod_description}'''
+# 模组列表界面显示的图标。
+# 路径规则：Forge 把这里的字符串直接交给 PathPackResources.getRootResource(...)，
+# 即【相对资源包根目录】查找 —— 与 Fabric 的 icon 字段不同（那个约定以 assets/ 开头），
+# 所以这里要写完整路径，对应 jar 内的 assets/ommc/icon.png。
+logoFile="assets/ommc/icon.png"
+# 纯客户端功能模组，不参与服务端的版本匹配检查。
+# 默认值 MATCH_VERSION 会要求客户端与服务端的 Forge 版本完全一致，否则服务器列表
+# 显示红叉并弹警告。本模组的兼容范围覆盖整个 47.1.0 ~ 47.4.x，故设为忽略。
+# 合法取值：IGNORE_ALL_VERSION / IGNORE_SERVER_VERSION / MATCH_VERSION
+displayTest="IGNORE_ALL_VERSION"
+
+[[dependencies.${mod_id}]]
+    modId="forge"
+    mandatory=true
+    versionRange="${forge_version_range}"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="BOTH"
+
+# MaFgLib（malilib 的 Forge 移植）是硬依赖：配置系统、配置界面、热键系统全部来自它。
+# mandatory=true 表示「不打包、要求用户另装」——本模组不会把它塞进 jar，
+# 缺少它时 Forge 会在加载阶段直接报错，而不是等到运行期才抛 NoClassDefFoundError。
+# 下界取 0.1.14（当前开发所用版本）。版本范围左闭右开：[0.1.14,0.2) 而非 [0.1.14,)，
+# 因为次版本号变动（如 0.2.x）可能重命名或删除类，而本模组会在类加载期直接引用它们。
+[[dependencies.${mod_id}]]
+    modId="mafglib"
+    mandatory=true
+    versionRange="[0.1.14,0.2)"
+    ordering="NONE"
+    side="CLIENT"

@@ -1,0 +1,254 @@
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+}
+
+version = mod_version
+group = mod_group_id
+
+base {
+    archivesName = mod_id
+}
+
+// 不用 java.toolchain：本机没有 Gradle 自动下载的 JDK，
+// 而 toolchain 解析在找不到时会尝试联网。直接用 MDK 原生的写法，
+// 由 JAVA_HOME 指向的 JDK 17 来编译。
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+minecraft {
+    // 1.20.1 只存在 official 频道
+    mappings channel: mapping_channel, version: mapping_version
+
+    copyIdeResources = true
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+
+            // Mixin 调试用：导出注入后的字节码，方便排查
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createMcpToSrg/output.tsrg"
+            property 'mixin.debug.export', 'true'
+
+            mods {
+                "${mod_id}" {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                "${mod_id}" {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+repositories {
+    mavenCentral()
+    // MaFgLib 的本地副本。用目录形式（Maven 布局）而不是 flatDir，
+    // 因为 fg.deobf 需要一个真正带坐标的模块依赖。
+    maven {
+        name = 'localLibs'
+        url = project.uri('libs/repo')
+    }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    // Mixin 注解处理器：负责生成 ommc.refmap.json（SRG 名 <-> official 名的映射表）。
+    //
+    // 这里不应用 'org.spongepowered.mixin' Gradle 插件，原因：
+    //   1. 本机缓存里没有该插件的产物，离线解析必然失败；
+    //   2. 该插件在 ForgeGradle 6 下最终也是配置下面这几个 annotationProcessor 参数，
+    //      走注解处理器这条路是等价的，且不需要任何额外下载 ——
+    //      处理器随 mixin-0.8.5.jar 一起分发（META-INF/services/javax.annotation.processing.Processor）。
+    annotationProcessor "org.spongepowered:mixin:${mixin_version}:processor"
+
+    // MaFgLib —— malilib 的 Forge 移植版。OMMC 的整套配置界面与热键系统都来自它
+    // （GuiConfigsBase / WidgetConfigOption / WidgetKeybindSettings / GuiKeybindSettings 等），
+    // 所以不需要自己实现 UI。
+    //
+    // 它的发布 jar 是 Forge 运行时的命名空间：official 类名 + SRG 方法名（如 m_91087_），
+    // 而本工程用 official 映射开发，两边方法名对不上，因此必须经 fg.deobf 转换。
+    //
+    // 注意：fg.deobf 不能用于 files(...)，那种「自解析依赖」会直接报
+    // "Cannot deobfuscate dependency of type DefaultSelfResolvingDependency"，
+    // 所以 jar 是以 Maven 布局放在 libs/repo 下、用坐标引用的。
+    implementation fg.deobf("org.thinkingstudio.mafglib:MaFgLib:0.1.14-mc1.20.1")
+}
+
+// 把 gradle.properties 里的值填进 mods.toml
+tasks.named('processResources', ProcessResources).configure {
+    // 关键：expand()/replace() 这类过滤默认使用「平台编码」读写文件。
+    // 在中文 Windows 上平台编码是 GBK，于是 UTF-8 的中文会被当成 GBK 解码再重新编码，
+    // 产出无效字节序列（实测渲染后的 mods.toml 出现 E6 A3 这种残缺序列）。
+    // TOML 规范要求 UTF-8，Forge 也按 UTF-8 解析，因此必须显式指定，
+    // 否则 mods.toml 里的中文注释会损坏、甚至导致模组无法加载。
+    filteringCharset = 'UTF-8'
+
+    var replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            forge_version          : forge_version,
+            forge_version_range    : forge_version_range,
+            loader_version_range   : loader_version_range,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+            mod_authors            : mod_authors,
+            mod_description        : mod_description
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml']) {
+        expand replaceProperties + [project: project]
+    }
+}
+
+// 产物文件名带构建时间戳，保留历史构建，避免每次互相覆盖。
+// 形如 ommc-1.0.0_260915_2341.jar —— 比示例多到「秒」，
+// 否则同一分钟内连续构建两次仍会重名覆盖。
+// 想改回分钟精度就把格式换成 'yyMMdd_HHmm'。
+// 在配置阶段取一次，保证同一次构建内所有任务看到同一个名字。
+def buildTimestamp = new Date().format('yyMMdd_HHmmss')
+
+tasks.named('jar', Jar).configure {
+    archiveFileName = "${mod_id}-${mod_version}_${buildTimestamp}.jar"
+
+    manifest {
+        attributes([
+                'Specification-Title'   : mod_id,
+                'Specification-Vendor'  : mod_authors,
+                'Specification-Version' : '1',
+                'Implementation-Title'  : project.name,
+                'Implementation-Version': project.jar.archiveVersion,
+                'Implementation-Vendor' : mod_authors,
+                // Mixin 配置在 jar manifest 里注册，Forge 的 ModLauncher 读这个属性
+                'MixinConfigs'          : "${mod_id}.mixins.json"
+        ])
+    }
+
+    finalizedBy 'reobfJar'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    dependsOn 'createMcpToSrg'
+    options.encoding = 'UTF-8'
+
+    // 打开弃用 API 的详细报告。
+    //
+    // 默认 javac 只说一句「某些输入文件使用或覆盖了已过时的 API」，不给具体位置。
+    // 本工程用 official 映射开发、且大量依赖 MaFgLib（malilib 的 Forge 移植），
+    // 上游 API 变动时很容易在不知不觉中调用到已弃用的方法，所以把位置直接暴露出来。
+    //
+    // deprecation 与 removal 是两个级别：removal 表示「已标记为将来删除」，比 deprecation
+    // 更严重。IDEA 两者都提示，而命令行构建默认连 deprecation 都不显示 ——
+    // 曾出现过「IDEA 报 4 条 removal、Gradle 构建一条不报」的情况，故两者都开。
+    options.compilerArgs += ['-Xlint:deprecation', '-Xlint:removal']
+
+    // 告诉 Mixin 注解处理器把 refmap 写成什么样、写到哪。
+    //
+    // ommc.mixins.json 里声明了 "refmap": "ommc.refmap.json"，此前 build.gradle
+    // 里没有任何东西会生成它，声明指向了一个不存在的文件。这组参数补上生成环节，
+    // 并让 mixin 在运行时能把官方名解析回 SRG 名。
+    options.annotationProcessorPath = configurations.annotationProcessor
+
+    // 处理器去哪里取映射表 —— 这是能否生成 refmap 的关键，实测踩坑记录：
+    //
+    // Mixin 0.8.5 的处理器的受支持参数只有 tokens / outRefMapFile / defaultObfuscationEnv /
+    // mappingTypes / quiet 等（见 org.spongepowered.tools.obfuscation.SupportedOptions），
+    // **并没有** inSrgFile / outSrgFile。它取映射表的方式是：
+    //   ObfuscationType.getInputFileNames() -> IOptionProvider.getOption(<该环境的参数名>)
+    //   -> new File(...).isFile() -> IMappingProvider.read(File)
+    //
+    // 【最关键的坑】参数名取决于用哪个混淆环境，两个服务的参数名不一样：
+    //   MCP 服务（老式 SRG 文本解析器 MappingProviderSrg）：
+    //       notch  环境 -> reobfNotchSrgFile / reobfNotchSrgFiles / outNotchSrgFile
+    //       searge 环境 -> reobfSrgFile / reobfSrgFiles / outSrgFile
+    //   FG3 服务（ForgeGradle 3+ 的 TSRG 解析器 MappingProviderTSrg）：
+    //       searge 环境 -> reobfTsrgFile / reobfTsrgFiles / outTsrgFile   ← 是 Tsrg 不是 Srg！
+    //
+    // 一开始错在把 TSRG 文件用 -AreobfSrgFile 传进去：
+    //   - MCP 服务的 searge 环境并不存在（ObfuscationServiceMCP 只注册 notch），参数等于白给；
+    //   - FG3 的 searge 环境读的是 reobfTsrgFile，没收到 -> 没有输入文件；
+    //   - ObfuscationManager.initProviders 里 type.isSupported() 为 false
+    //     -> 该环境根本不会被创建 -> 查询时 environments 为空 -> 每个 @Inject/@Shadow
+    //        都报 "Unable to locate obfuscation mapping"，编译失败。
+    // 参数名换对之后，环境才会被创建并真正读到映射。
+    def tsrgMappingFile = file("${project.buildDir}/createMcpToSrg/output.tsrg")
+    def tsrgOutputFile = file("${project.buildDir}/mappings/ommc-mixin.tsrg")
+
+    tsrgOutputFile.parentFile.mkdirs()
+
+    options.compilerArgs += [
+            "-AreobfTsrgFile=${tsrgMappingFile.absolutePath}",
+            "-AoutTsrgFile=${tsrgOutputFile.absolutePath}"
+    ]
+
+    options.compilerArgs += [
+            // 声明映射表是 TSRG 格式。
+            //
+            // 实测这条参数的实际效果，日志里能看到：
+            //   "Supported obfuscation types:
+            //      ObfuscationServiceMCP supports [notch] ObfuscationServiceFG3 supports [searge]"
+            // 也就是它启用了 ForgeGradle 3+ 的 ObfuscationServiceFG3，把 TSRG 解析器
+            // (MappingProviderTSrg) 绑在 searge 环境上；没有它就只有 notch 环境，
+            // 而 notch 环境用的是老式 SRG 解析器，喂 TSRG 文件会直接抛
+            // "MixinException: Invalid SRG file"。
+            "-AmappingTypes=tsrg",
+            // refmap 输出文件的名称，必须与 ommc.mixins.json 的 "refmap" 字段一致
+            "-AoutRefMapFile=${project.buildDir}/resources/main/${mod_id}.refmap.json",
+            // 默认混淆环境设成 searge（FG3/TSRG 那个）。不设的话默认是 searge 之外的
+            // 取值路径会走到 notch 环境，而 notch 环境没有输入映射，于是所有
+            // @Inject/@Shadow 都报 "Unable to locate obfuscation mapping"。
+            "-AdefaultObfuscationEnv=searge",
+            // 处理器找不到映射时给出详细消息（这个开关压不住 ERROR 级的映射缺失，
+            // 保持 false 是为了让映射出问题时能直接看见原因）
+            "-Aquiet=false"
+    ]
+}
+
+// 把注解处理器生成的 refmap 纳入 jar。
+//
+// 注意：零 mixin 的项目里处理器不会写出该文件，此时下面这个 from 指向一个不存在的路径。
+// Gradle 对这种「拷贝时源文件缺失」默认是静默跳过，不会让构建失败，已验证。
+// 等你加入第一个 @Mixin，文件就会自动出现并被打进 jar。
+//tasks.named('jar', Jar).configure {
+//    from("${project.buildDir}/resources/main/${mod_id}.refmap.json") {
+//        into ''
+//    }
+//}
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            url "file://${project.projectDir}/mcmodsrepo"
+        }
+    }
+}

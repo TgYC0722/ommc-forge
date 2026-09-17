@@ -1,0 +1,55 @@
+{
+  "ommc.gui.title.configs": "Oh My Minecraft Client - Config - Version: %s",
+  "ommc.gui.button.tab.generic": "Generic",
+  "ommc.gui.button.tab.feature_toggle": "Feature Toggles",
+  "ommc.gui.button.tab.lists": "Lists",
+  "ommc.gui.button.tab.advanced_integrated_server": "Advanced Integrated Server",
+  "ommc.hotkeys.category.generic_hotkeys": "OMMC Generic",
+  "ommc.gui.label.list_type.whitelist": "Whitelist",
+  "ommc.gui.label.list_type.blacklist": "Blacklist",
+  "ommc.gui.label.sort_inventory_shulker_box_last_type.false": "FALSE",
+  "ommc.gui.label.sort_inventory_shulker_box_last_type.true": "TRUE",
+  "ommc.gui.label.sort_inventory_shulker_box_last_type.auto": "AUTO",
+  "ommc.highlight_waypoint.tooltip": "Click to highlight waypoint.",
+
+  "config.name.clearwaypoint": "§cClear Highlighted Waypoint (Not Implemented)",
+  "config.comment.clearwaypoint": "§c[NOT IMPLEMENTED]§r A hotkey to clear the highlighted waypoint.",
+  "config.name.forceparsewaypointfromchat": "§cForce Parsing Waypoints from Chat (Not Implemented)",
+  "config.comment.forceparsewaypointfromchat": "§c[NOT IMPLEMENTED]§r Force parsing waypoints from chat, overriding any existing click event.",
+  "config.name.parsewaypointfromchat": "§cParse Waypoints from Chat (Not Implemented)",
+  "config.comment.parsewaypointfromchat": "§c[NOT IMPLEMENTED]§r Parse waypoints from chat messages.",
+
+  "config.name.dontclearchathistory": "Persist Chat History",
+  "config.comment.dontclearchathistory": "Save the chat messages to a file when leaving a world, and restore them the next time you join the same world. Saved separately per world (save / server), so histories never mix. Note: only the messages are saved, not the input history (the ones you scroll through with the up arrow).",
+
+  "config.name.disableblocklistcheck": "§cDisable Player Blocklist Check (Not Implemented)",
+  "config.comment.disableblocklistcheck": "§c[NOT IMPLEMENTED]§r Workaround for MC-218167: keep the network request from blocking the render thread.",
+
+  "config.name.disablepistonpushentity": "§cDisable Piston Pushing Entities (Not Implemented)",
+  "config.comment.disablepistonpushentity": "§c[NOT IMPLEMENTED]§r Reduce piston lag (e.g. carpet duplicators) by preventing client-side pistons from pushing entities (except the player). May cause entity position rendering errors.",
+
+  "config.name.highlightpersistentmob": "§cHighlight Persistent Mobs (Not Implemented)",
+  "config.comment.highlightpersistentmob": "§c[NOT IMPLEMENTED]§r Highlight mobs that will not despawn. Limited by client-side data: currently only mobs holding special items or with custom names can be detected.",
+  "config.name.highlightpersistentmobclientmode": "§cHighlight Persistent Mobs Client Mode (Not Implemented)",
+  "config.comment.highlightpersistentmobclientmode": "§c[NOT IMPLEMENTED]§r Use client-side data (held item, custom name) to decide whether a mob will despawn. May misjudge. Keep this off in singleplayer; on servers MasaGadget's syncAllEntityData can be used to sync entity data locally.",
+
+  "config.name.worldeaterminehelper": "§cWorld Eater Mine Helper (Not Implemented)",
+  "config.comment.worldeaterminehelper": "§c[NOT IMPLEMENTED]§r When blocks listed in the World Eater Mine Helper Whitelist are exposed to air, the client renders a mirror image of them above, to help with world eater maintenance and mining.",
+
+  "config.name.highlightentityblacklist": "§cHighlight Entity List Blacklist (Not Implemented)",
+  "config.comment.highlightentityblacklist": "§c[NOT IMPLEMENTED]§r Blacklist for the entity highlight feature.",
+  "config.name.highlightentitylisttype": "§cHighlight Entity List Type (Not Implemented)",
+  "config.comment.highlightentitylisttype": "§c[NOT IMPLEMENTED]§r Whether highlightEntityWhiteList/BlackList is treated as a whitelist or a blacklist.",
+  "config.name.highlightentitywhitelist": "§cHighlight Entity List Whitelist (Not Implemented)",
+  "config.comment.highlightentitywhitelist": "§c[NOT IMPLEMENTED]§r Whitelist for the entity highlight feature.",
+
+  "config.name.worldeaterminehelperwhitelist": "§cWorld Eater Mine Helper Whitelist (Not Implemented)",
+  "config.comment.worldeaterminehelperwhitelist": "§c[NOT IMPLEMENTED]§r Blocks that get the mirrored render while worldEaterMineHelper is enabled.",
+
+  "config.name.blockmodelnooffsetblacklist": "§cBlock Model No-Offset List Blacklist (Not Implemented)",
+  "config.comment.blockmodelnooffsetblacklist": "§c[NOT IMPLEMENTED]§r Blacklist for the block model no-offset feature.",
+  "config.name.blockmodelnooffsetlisttype": "§cBlock Model No-Offset List Type (Not Implemented)",
+  "config.comment.blockmodelnooffsetlisttype": "§c[NOT IMPLEMENTED]§r Whether blockModelNoOffsetWhitelist/Blacklist is treated as a whitelist or a blacklist.",
+  "config.name.blockmodelnooffsetwhitelist": "§cBlock Model No-Offset List Whitelist (Not Implemented)",
+  "config.comment.blockmodelnooffsetwhitelist": "§c[NOT IMPLEMENTED]§r Whitelist for the block model no-offset feature."
+}

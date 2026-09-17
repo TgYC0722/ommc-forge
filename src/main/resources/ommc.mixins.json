@@ -1,0 +1,30 @@
+{
+  "_comment_worldEater": "世吞挖矿助手功能暂缓（未完成）。原注册项如下，恢复时把它们移回 client 数组即可：feature.worldEaterMineHelper.BlockModelAccessor / feature.worldEaterMineHelper.BlockStateBaseAccessor / feature.worldEaterMineHelper.MixinJsonUnbakedModel",
+  "required": true,
+  "minVersion": "0.8.5",
+  "package": "com.plusls.ommc.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "ommc.refmap.json",
+  "_comment_blockModelNoOffset": "方块模型没有偏移 功能暂缓（未完成）。原注册项：feature.blockModelNoOffset.MixinBlockModelRenderer —— 它在 1.20.1 Forge 上无法注入（getOffset 只存在于 Forge 新增的 12 参 tesselateBlock 重载里，而该重载在官方映射中没有 SRG 名，refmap 生成不出条目，启动即 InjectionError）。恢复前需先解决这个映射问题。",
+  "client": [
+    "accessor.ChatComponentAccessor",
+    "feature.advancedIntegratedServer.MixinIntegratedServer",
+    "feature.advancedIntegratedServer.MixinIntegratedServerPort",
+    "feature.autoSwitchElytra.MixinClientPlayerEntity",
+    "feature.betterSneaking.MixinPlayerEntity",
+    "feature.disableBreakBlock.MixinClientPlayerInteractionManager",
+    "feature.disableBreakScaffolding.MixinClientPlayerInteractionManager",
+    "feature.disableMoveDownInScaffolding.MixinScaffoldingBlock",
+    "feature.disableMoveDownInScaffolding.ScaffoldingBlockAccessor",
+    "feature.flatDigger.MixinClientPlayerInteractionManager",
+    "feature.forceBreakingCooldown.MixinClientPlayerInteractionManager",
+    "feature.forceBreakingCooldown.MultiPlayerGameModeAccessor",
+    "feature.highlightLavaSource.FluidTypeAccessor",
+    "feature.preventIntentionalGameDesign.MixinClientPlayerInteractionManager",
+    "feature.preventWastageOfWater.MixinClientPlayerInteractionManager",
+    "feature.removeBreakCooldown.MixinClientPlayerInteractionManager"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
